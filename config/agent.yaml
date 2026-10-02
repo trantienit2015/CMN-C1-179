@@ -1,0 +1,34 @@
+# Agent Manifest — AgentRegistry entry point.
+# Every key below is read at ROOT level; nesting them under an `agent:` block makes
+# them invisible to the registry (namespace/enabled fall back to defaults and
+# name/version never resolve). Runtime parameters live in config/config.yaml.
+id: "CMN-C1-179"
+name: "RLAnomalyDetectionAgent"
+# Registry key component: {namespace}/{name}@{version} — the industry code, lowercased.
+namespace: "cmn"
+version: "1.0.0"
+enabled: true
+category: "Cat 1"
+industry: "CMN"
+# Static generation contract of the deployed agent. Detection (steps 3-5) and the
+# structured report (step 6) stay fully deterministic; "llm" reflects the optional
+# executive-narrative enhancement in MainNode, which degrades to no narrative (never
+# to an error) whenever the three secrets below are absent or the call fails.
+generation_mode: "llm"  # deterministic | llm
+# Compatibility metadata only — not an inheritance selector.
+base_type: "ChatAgent"
+
+# Entry point — one dotted import path (module.Class); the registry splits it on the
+# last dot, so a separate module:/class: pair never resolves.
+class: "src.graph.graph.RLAnomalyDetectionAgent"
+
+# S-1 trust gate declared for the deployment. Per-node enforcement stays in the node
+# classes; this value does not replace it.
+required_trust_level: "INTERNAL"
+
+# Compile-time gates — every secret and extra actually used must be declared.
+# All three are for the optional MainNode narrative enhancement only; detection
+# itself needs none of them and runs unchanged if they are never provisioned.
+requires:
+  secrets: ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT"]
+  extras: ["openai"]
